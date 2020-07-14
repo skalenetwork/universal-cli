@@ -6,7 +6,7 @@ Universal Python wrapper for SKALE Manager contracts.
 
 This CLI/Python module could be used to execute (almost) any call/transaction on SKALE Manager contracts.  
 CLI groups and commands are generated automatically from provided ABI file so there is no need to update CLI after SM changes.  
-Also there is no such thing as 'call implemented only on SKALE Manager side' - all call and transactions from ABI file are already here, just add `--help` to see details.
+Also there is no such thing as 'call implemented only on SKALE Manager side' - all calls and transactions from ABI file are already here, just add `--help` to see the details.
 
 #### Current limitations
 
