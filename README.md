@@ -14,6 +14,7 @@ Also there is no such thing as 'call implemented only on SKALE Manager side' - a
 - No retries, dry runs and balance checks for transactions
 - No data formatting - only raw data from smart contracts
 - No gas estimation (8m for all transactions)
+- No pre-built binary and no pip package (yet)
 
 ## Usage
 
