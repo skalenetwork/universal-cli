@@ -26,6 +26,18 @@ Supported wallets:
 - Web3 wallet
 - Ledger wallet
 
+### Environment options
+
+Required:
+
+- `ENDPOINT`
+
+For transactions you should set one of those:
+
+- `ETH_PRIVATE_KEY`
+- `LEDGER`
+- `TM_URL`
+
 ### CLI usage
 
 #### List avaliable contacts
