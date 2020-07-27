@@ -8,6 +8,7 @@ from skale.contracts.base_contract import BaseContract, transaction_method
 from cli.manager_client import ManagerClient
 
 from cli.config import ENDPOINT, ABI_FILEPATH, ETH_PRIVATE_KEY, LEDGER, TM_URL
+from cli.config import ENDPOINT, ABI_FILEPATH, ETH_PRIVATE_KEY, LEDGER, TM_URL, USE_CALLS
 from cli.manager_client import init_contract_names
 
 ABI = get_abi(ABI_FILEPATH)
@@ -35,7 +36,8 @@ def generate_cmd(contract_name, fn):
             print('Set ENDPOINT option to the environment')
             exit(1)
         mc = ManagerClient(ENDPOINT, ABI)
-        is_call = fn['stateMutability'] == 'view'
+        is_call = fn['stateMutability'] == 'view' or USE_CALLS
+
 
         if not is_call and not (ETH_PRIVATE_KEY or LEDGER or TM_URL):
             print('To execute transactions you should set ETH_PRIVATE_KEY/LEDGER/TM_URL')

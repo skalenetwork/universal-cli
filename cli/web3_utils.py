@@ -22,7 +22,7 @@ from skale.wallets import LedgerWallet, RPCWallet, Web3Wallet
 from skale.utils.web3_utils import init_web3
 from skale.utils.exceptions import InvalidWalletError, EmptyWalletError, IncompatibleAbiError
 
-from cli.config import TM_URL, ETH_PRIVATE_KEY, LEDGER
+from cli.config import TM_URL, ETH_PRIVATE_KEY, LEDGER, USE_CALLS
 
 
 def init_wallet(endpoint):
