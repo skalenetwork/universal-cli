@@ -23,6 +23,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 from skale.utils.web3_utils import get_provider, wait_for_receipt_by_blocks
+from cli.config import CALL_SENDER
 from skale.contracts.contract_manager import ContractManager
 from skale.contracts.base_contract import BaseContract
 from skale.utils.abi_utils import get_contract_address_by_name, get_contract_abi_by_name
@@ -87,14 +88,22 @@ class ManagerClient:
         for name in kwargs:
             if check_int(kwargs[name]):
                 kwargs[name] = int(kwargs[name])
+
+
         params = list(kwargs.values())
+
+
 
         print(f'Going to run {function_name} on {contract_name}')
         contract_funcs = contract.contract.functions
         func_to_run = getattr(contract_funcs, function_name)
 
         if is_call:
-            res = func_to_run(*params).call()
+            if CALL_SENDER is not None:
+                p = {'from':  CALL_SENDER}
+            else:
+                p = {}
+            res = func_to_run(*params).call(p)
         else:
             tx_hash = post_transaction(self.wallet, func_to_run(*params), 8000000)
             res = wait_for_receipt_by_blocks(
