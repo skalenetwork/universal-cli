@@ -135,3 +135,5 @@ pip install -e .[dev]
 ## License
 
 [![License](https://img.shields.io/github/license/skalenetwork/sgx.py.svg)](LICENSE)
+
+Copyright (C) 2020-present SKALE Labs
