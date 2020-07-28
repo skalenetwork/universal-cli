@@ -44,9 +44,8 @@ def generate_cmd(contract_name, fn):
             exit(1)
 
         res = mc.run_func(contract_name, function_name, is_call, kwargs)
-        print('=============================')
-        print('Result: \n')
-        print(res)
+
+        print(f'TRANSACTION_RESULT:{res}')
     return click.Command(function_name, params=params, callback=callback)
 
 
