@@ -131,3 +131,7 @@ print(res)
 ```bash
 pip install -e .[dev]
 ```
+
+## License
+
+[![License](https://img.shields.io/github/license/skalenetwork/sgx.py.svg)](LICENSE)
