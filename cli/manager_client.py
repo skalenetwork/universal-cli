@@ -94,19 +94,20 @@ class ManagerClient:
 
 
 
-        print(f'Going to run {function_name} on {contract_name}')
+        print(f'RUNNING:{function_name}:{contract_name}')
         contract_funcs = contract.contract.functions
         func_to_run = getattr(contract_funcs, function_name)
 
-        if CALL_SENDER is not None:
-            p = {'from':  CALL_SENDER}
-        else:
-            p = {}
-
-        estimated_gas = func_to_run(*params).estimateGas(p)
-        print(f'\nEstimated gas: {estimated_gas}')
-
         if is_call:
+            if CALL_SENDER is not None:
+                p = {'from':  CALL_SENDER}
+            else:
+                p = {}
+
+            gas = func_to_run(*params).estimateGas(p)
+
+            print(f'GAS_USED:{gas}')
+
             res = func_to_run(*params).call(p)
         else:
             tx_hash = post_transaction(self.wallet, func_to_run(*params), 8000000)
