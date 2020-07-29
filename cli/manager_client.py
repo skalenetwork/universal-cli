@@ -20,30 +20,21 @@
 import logging
 
 from web3 import Web3
-from web3.middleware import geth_poa_middleware
 
 from skale.utils.web3_utils import get_provider, wait_for_receipt_by_blocks
-from cli.config import CALL_SENDER
 from skale.contracts.contract_manager import ContractManager
 from skale.contracts.base_contract import BaseContract
 from skale.utils.abi_utils import get_contract_address_by_name, get_contract_abi_by_name
-from skale.transactions.tools import post_transaction, make_dry_run_call
+from skale.transactions.tools import post_transaction
 
 from cli.web3_utils import init_wallet
-from cli.helper import to_camel_case, check_int
+from cli.helper import to_camel_case, check_int, get_contract_names
+from cli.config import CALL_SENDER
 
 logger = logging.getLogger(__name__)
 
 
-def init_contract_names(abi):
-    contract_names = []
-    for contract_name in abi:
-        if '_address' in str(contract_name):
-            contract_names.append(contract_name.replace('_address', ''))
-    return contract_names
-
-
-class Skale:
+class SkaleMock:
     def __init__(self, web3):
         self.web3 = web3
 
@@ -51,64 +42,51 @@ class Skale:
 class ManagerClient:
     def __init__(self, endpoint, abi, wallet=None, provider_timeout=30):
         logger.info(f'Initializing ManagerClient, endpoint: {endpoint}')
-        self.contract_names = init_contract_names(abi)
+        self.contract_names = get_contract_names(abi)
         self.abi = abi
-
-        if wallet:
-            self.wallet = wallet
-        else:
-            self.wallet = init_wallet(endpoint)
-
-        provider = get_provider(endpoint, timeout=provider_timeout)
-        self.web3 = Web3(provider)
-        self.skale = Skale(self.web3)
-
-        cm_address = get_contract_address_by_name(abi, 'contract_manager')
-        cm_abi = get_contract_abi_by_name(abi, 'contract_manager')
+        self.wallet = wallet if wallet else init_wallet(endpoint)
+        self.web3 = Web3(get_provider(endpoint, timeout=provider_timeout))
+        self.skale = SkaleMock(self.web3)
         self.cm_contract = ContractManager(
             skale=self.skale,
             name='ContractManager',
-            address=cm_address,
-            abi=cm_abi
+            address=get_contract_address_by_name(abi, 'contract_manager'),
+            abi=get_contract_abi_by_name(abi, 'contract_manager')
         )
 
-    def run_func(self, contract_name, function_name, is_call, kwargs):
-        cm_name = to_camel_case(contract_name)
-        address = self.cm_contract.get_contract_address(cm_name)
+    def get_contract_address(self, contract_name):
+        return self.cm_contract.get_contract_address(
+            name=to_camel_case(contract_name)
+        )
 
-        address = get_contract_address_by_name(self.abi, contract_name)
-        abi = get_contract_abi_by_name(self.abi, contract_name)
-        contract = BaseContract(
+    def init_contract(self, contract_name):
+        address = self.get_contract_address(contract_name)
+        contract_abi = get_contract_abi_by_name(self.abi, contract_name)
+        return BaseContract(
             skale=self.skale,
             name=contract_name,
             address=address,
-            abi=abi
+            abi=contract_abi
         )
 
+    def transform_kwargs(self, kwargs):
         for name in kwargs:
             if check_int(kwargs[name]):
                 kwargs[name] = int(kwargs[name])
+        return list(kwargs.values())
 
+    def exec(self, contract_name, function_name, is_call, kwargs):
+        logger.info(f'Executing function {function_name} on contract {contract_name}')
+        contract = self.init_contract(contract_name)
+        params = self.transform_kwargs(kwargs)
+        func_to_run = getattr(contract.contract.functions, function_name)
 
-        params = list(kwargs.values())
-
-
-
-        print(f'RUNNING:{function_name}:{contract_name}')
-        contract_funcs = contract.contract.functions
-        func_to_run = getattr(contract_funcs, function_name)
+        call_params = {'from':  CALL_SENDER} if CALL_SENDER else {}
+        gas = func_to_run(*params).estimateGas(call_params)
+        logger.info(f'Estimated gas for {contract_name}.{function_name}: {gas}')
 
         if is_call:
-            if CALL_SENDER is not None:
-                p = {'from':  CALL_SENDER}
-            else:
-                p = {}
-
-            gas = func_to_run(*params).estimateGas(p)
-
-            print(f'GAS_USED:{gas}')
-
-            res = func_to_run(*params).call(p)
+            res = func_to_run(*params).call(call_params)
         else:
             tx_hash = post_transaction(self.wallet, func_to_run(*params), 8000000)
             res = wait_for_receipt_by_blocks(

@@ -23,11 +23,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-ENDPOINT = os.environ.get('ENDPOINT')
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+
+ENDPOINT = os.environ.get('ENDPOINT')
 ABI_FILEPATH = os.path.join(DIR_PATH, os.pardir, 'manager.json')
+
 TM_URL = os.environ.get('TM_URL')
 ETH_PRIVATE_KEY = os.environ.get('ETH_PRIVATE_KEY')
 LEDGER = os.environ.get('LEDGER')
-USE_CALLS = (os.environ.get("USE_CALLS") != None)
+
+DRY_RUN = os.getenv('DRY_RUN') == 'True'
 CALL_SENDER = os.environ.get("CALL_SENDER")

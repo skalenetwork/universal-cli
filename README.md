@@ -1,6 +1,6 @@
 # SKALE Universal CLI
 
-Universal Python wrapper for SKALE Manager contracts.  
+Universal Python wrapper for SKALE Manager contracts ✨
 
 ## What it is
 
@@ -28,7 +28,7 @@ Supported wallets:
 
 ### Environment options
 
-Required:
+#### Required
 
 - `ENDPOINT`
 
@@ -37,6 +37,11 @@ For transactions you should set one of those:
 - `ETH_PRIVATE_KEY`
 - `LEDGER`
 - `TM_URL`
+
+#### Optional
+
+- `DRY_RUN` - Run the transaction method as a call
+- `CALL_SENDER` - Ethereum address that will be used in the call
 
 ### CLI usage
 
@@ -115,7 +120,7 @@ kwargs = {
     'feeRate': '10',
     'minimumDelegationAmount': '100',
 }
-res = mc.run_func(
+res = mc.exec(
     contract_name='validator_serivce',
     function_name='registerValidator',
     transaction=True,

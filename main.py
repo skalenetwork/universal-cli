@@ -1,15 +1,35 @@
+#   -*- coding: utf-8 -*-
+#
+#   This file is part of SKALE.py
+#
+#   Copyright (C) 2019 SKALE Labs
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU Lesser General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU Lesser General Public License for more details.
+#
+#   You should have received a copy of the GNU Lesser General Public License
+#   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import logging
 import click
 
-from skale.utils.helper import get_abi
-from skale.utils.abi_utils import get_contract_address_by_name, get_contract_abi_by_name
-from skale.contracts.base_contract import BaseContract, transaction_method
-
+from skale.utils.helper import get_abi, init_default_logger
+from skale.utils.abi_utils import get_contract_abi_by_name
 
 from cli.manager_client import ManagerClient
+from cli.config import ENDPOINT, ABI_FILEPATH, ETH_PRIVATE_KEY, LEDGER, TM_URL, DRY_RUN
+from cli.helper import is_func_call, get_contract_names
 
-from cli.config import ENDPOINT, ABI_FILEPATH, ETH_PRIVATE_KEY, LEDGER, TM_URL
-from cli.config import ENDPOINT, ABI_FILEPATH, ETH_PRIVATE_KEY, LEDGER, TM_URL, USE_CALLS
-from cli.manager_client import init_contract_names
+
+init_default_logger()
+logger = logging.getLogger(__name__)
 
 ABI = get_abi(ABI_FILEPATH)
 
@@ -33,25 +53,21 @@ def generate_cmd(contract_name, fn):
     @click.pass_context
     def callback(*args, **kwargs):
         if not ENDPOINT:
-            print('Set ENDPOINT option to the environment')
+            logger.error('Set ENDPOINT option to the environment')
             exit(1)
         mc = ManagerClient(ENDPOINT, ABI)
-        is_call = fn['stateMutability'] == 'view' or USE_CALLS
-
-
+        is_call = is_func_call(fn) or DRY_RUN
         if not is_call and not (ETH_PRIVATE_KEY or LEDGER or TM_URL):
-            print('To execute transactions you should set ETH_PRIVATE_KEY/LEDGER/TM_URL')
+            logger.error('To execute transactions you should set ETH_PRIVATE_KEY/LEDGER/TM_URL')
             exit(1)
-
-        res = mc.run_func(contract_name, function_name, is_call, kwargs)
-
-        print(f'TRANSACTION_RESULT:{res}')
+        res = mc.exec(contract_name, function_name, is_call, kwargs)
+        logger.info(f'TRANSACTION_RESULT: {res}')
     return click.Command(function_name, params=params, callback=callback)
 
 
 def init_groups():
     groups = []
-    contract_names = init_contract_names(ABI)
+    contract_names = get_contract_names(ABI)
     for contract_name in contract_names:
         group = click.Group(name=f'{contract_name}_cli')
         group_internal = click.Group(name=f'{contract_name}')
@@ -62,7 +78,6 @@ def init_groups():
                 cmd = generate_cmd(contract_name, fn)
                 group_internal.add_command(cmd)
         group.add_command(group_internal)
-       
         groups.append(group)
     return groups
 

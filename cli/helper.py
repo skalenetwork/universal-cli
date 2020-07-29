@@ -29,3 +29,15 @@ def check_int(s):
     if s[0] in ('-', '+'):
         return s[1:].isdigit()
     return s.isdigit()
+
+
+def is_func_call(fn):
+    return fn['stateMutability'] == 'view'
+
+
+def get_contract_names(abi):
+    contract_names = []
+    for contract_name in abi:
+        if '_address' in str(contract_name):
+            contract_names.append(contract_name.replace('_address', ''))
+    return contract_names

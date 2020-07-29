@@ -34,7 +34,7 @@ setup(
     long_description_markdown_filename='README.md',
     author='SKALE Labs',
     author_email='support@skalelabs.com',
-    url='https://github.com/skalenetwork/skale.py',
+    url='https://github.com/skalenetwork/universal-cli',
     include_package_data=True,
     install_requires=[
         "skale.py==3.10.dev15",
