@@ -1,5 +1,7 @@
 # SKALE Universal CLI
 
+[![Discord](https://img.shields.io/discord/534485763354787851.svg)](https://discord.gg/vvUtWJB)
+
 Universal Python wrapper for SKALE Manager contracts ✨
 
 ## What it is
