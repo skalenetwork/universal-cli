@@ -4,6 +4,8 @@
 
 Universal Python wrapper for SKALE Manager contracts ✨
 
+> ⚠️ Important note: this CLI is meant to be used only for **development** purposes and debugging. For the production-ready tools refer to `skale.py` or `validator-cli`
+
 ## What it is
 
 This CLI/Python module could be used to execute (almost) any call/transaction on SKALE Manager contracts.  
