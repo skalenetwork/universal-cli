@@ -82,7 +82,11 @@ class ManagerClient:
         func_to_run = getattr(contract.contract.functions, function_name)
 
         call_params = {'from':  CALL_SENDER} if CALL_SENDER else {}
-        gas = func_to_run(*params).estimateGas(call_params)
+        try:
+            gas = func_to_run(*params).estimateGas(call_params)
+        except Exception as e:
+            logger.error(f'estimateGas for {contract_name}.{function_name} failed, check the logs')
+            raise(e)
         logger.info(f'Estimated gas for {contract_name}.{function_name}: {gas}')
 
         if is_call:
