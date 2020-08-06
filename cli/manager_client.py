@@ -29,7 +29,6 @@ from skale.transactions.tools import post_transaction
 
 from cli.web3_utils import init_wallet
 from cli.helper import to_camel_case, check_int, get_contract_names
-from cli.config import CALL_SENDER
 
 logger = logging.getLogger(__name__)
 
@@ -75,15 +74,17 @@ class ManagerClient:
                 kwargs[name] = int(kwargs[name])
         return list(kwargs.values())
 
-    def exec(self, contract_name, function_name, is_call, kwargs):
+    def exec(self, contract_name, function_name, is_call, call_sender=None, gas_limit=None, kwargs={}):
         logger.info(f'Executing function {function_name} on contract {contract_name}')
         contract = self.init_contract(contract_name)
         params = self.transform_kwargs(kwargs)
         func_to_run = getattr(contract.contract.functions, function_name)
 
-        call_params = {'from':  CALL_SENDER} if CALL_SENDER else {}
+        call_params = {'from':  call_sender} if call_sender else {}
         try:
             gas = func_to_run(*params).estimateGas(call_params)
+            if not gas_limit:
+                gas_limit = gas
         except Exception as e:
             logger.error(f'estimateGas for {contract_name}.{function_name} failed, check the logs')
             raise(e)
@@ -92,7 +93,7 @@ class ManagerClient:
         if is_call:
             res = func_to_run(*params).call(call_params)
         else:
-            tx_hash = post_transaction(self.wallet, func_to_run(*params), 8000000)
+            tx_hash = post_transaction(self.wallet, func_to_run(*params), gas_limit)
             res = wait_for_receipt_by_blocks(
                 self.skale.web3,
                 tx_hash

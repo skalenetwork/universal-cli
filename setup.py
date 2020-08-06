@@ -37,7 +37,7 @@ setup(
     url='https://github.com/skalenetwork/universal-cli',
     include_package_data=True,
     install_requires=[
-        "skale.py==3.10.dev15",
+        "skale.py==3.10.dev19",
         "python-dotenv==0.10.3",
         "Click==7.1.2"
     ],

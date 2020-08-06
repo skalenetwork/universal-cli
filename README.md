@@ -47,6 +47,7 @@ For transactions you should set one of those:
 - `DRY_RUN` - Run the transaction method as a call (`True/False`)
 - `SKIP_ESTIMATE` - skip gas estimation before running (`True/False`)
 - `CALL_SENDER` - Ethereum address that will be used in the call
+- `GAS_LIMIT` - gas limit for the transaction/call, if not specified, defaults to `estimateGas` result
 
 ### CLI usage
 

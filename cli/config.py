@@ -35,3 +35,4 @@ LEDGER = os.environ.get('LEDGER')
 DRY_RUN = os.getenv('DRY_RUN') == 'True'
 SKIP_ESTIMATE = os.getenv('SKIP_ESTIMATE') == 'True'
 CALL_SENDER = os.environ.get("CALL_SENDER")
+GAS_LIMIT = os.environ.get("GAS_LIMIT")
