@@ -24,7 +24,8 @@ from skale.utils.helper import get_abi, init_default_logger
 from skale.utils.abi_utils import get_contract_abi_by_name
 
 from cli.manager_client import ManagerClient
-from cli.config import ENDPOINT, ABI_FILEPATH, ETH_PRIVATE_KEY, LEDGER, TM_URL, DRY_RUN, CALL_SENDER
+from cli.config import (ENDPOINT, ABI_FILEPATH, ETH_PRIVATE_KEY, LEDGER, TM_URL, DRY_RUN,
+                        CALL_SENDER, GAS_LIMIT)
 from cli.helper import is_func_call, get_contract_names
 
 
