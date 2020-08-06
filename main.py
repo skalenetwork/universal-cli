@@ -25,7 +25,7 @@ from skale.utils.abi_utils import get_contract_abi_by_name
 
 from cli.manager_client import ManagerClient
 from cli.config import (ENDPOINT, ABI_FILEPATH, ETH_PRIVATE_KEY, LEDGER, TM_URL, DRY_RUN,
-                        CALL_SENDER, GAS_LIMIT)
+                        CALL_SENDER, GAS_LIMIT, GAS_PRICE)
 from cli.helper import is_func_call, get_contract_names
 
 
@@ -61,7 +61,8 @@ def generate_cmd(contract_name, fn):
         if not is_call and not (ETH_PRIVATE_KEY or LEDGER or TM_URL):
             logger.error('To execute transactions you should set ETH_PRIVATE_KEY/LEDGER/TM_URL')
             exit(1)
-        res = mc.exec(contract_name, function_name, is_call, CALL_SENDER, GAS_LIMIT, kwargs)
+        res = mc.exec(contract_name, function_name, is_call, CALL_SENDER, GAS_LIMIT, GAS_PRICE,
+                      kwargs)
         logger.info(f'TRANSACTION_RESULT: {res}')
     return click.Command(function_name, params=params, callback=callback)
 

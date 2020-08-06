@@ -74,7 +74,8 @@ class ManagerClient:
                 kwargs[name] = int(kwargs[name])
         return list(kwargs.values())
 
-    def exec(self, contract_name, function_name, is_call, call_sender=None, gas_limit=None, kwargs={}):
+    def exec(self, contract_name, function_name, is_call, call_sender=None, gas_limit=None,
+             gas_price=None, kwargs={}):
         logger.info(f'Executing function {function_name} on contract {contract_name}')
         contract = self.init_contract(contract_name)
         params = self.transform_kwargs(kwargs)
@@ -93,7 +94,8 @@ class ManagerClient:
         if is_call:
             res = func_to_run(*params).call(call_params)
         else:
-            tx_hash = post_transaction(self.wallet, func_to_run(*params), gas_limit)
+            tx_hash = post_transaction(self.wallet, func_to_run(*params), gas_limit=gas_limit,
+                                       gas_price=gas_price)
             res = wait_for_receipt_by_blocks(
                 self.skale.web3,
                 tx_hash

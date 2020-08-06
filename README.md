@@ -47,6 +47,7 @@ For transactions you should set one of those:
 - `SKIP_ESTIMATE` - skip gas estimation before running (`True/False`). Default: `False`.
 - `CALL_SENDER` - Ethereum address that will be used in the call. Default: `None`.
 - `GAS_LIMIT` - gas limit for the transaction/call. Default: result of the `estimateGas` function.
+- `GAS_PRICE` - gas price for the transaction. Default: calculated by `web3py`.
 - `ABI_FILEPATH` - path to the ABI. Default: `[PROJECT_ROOT]/manager.json`
 
 ### CLI usage
