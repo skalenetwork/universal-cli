@@ -100,8 +100,8 @@ class ManagerClient:
         if is_call:
             res = func_to_run(*params).call(call_params)
         else:
-            tx_hash = post_transaction(self.wallet, func_to_run(*params), gas_limit=gas_limit,
-                                       gas_price=gas_price)
+            tx_hash = post_transaction(self.wallet, func_to_run(*params), gas_limit=int(gas_limit),
+                                       gas_price=int(gas_price))
             res = wait_for_receipt_by_blocks(
                 self.skale.web3,
                 tx_hash
