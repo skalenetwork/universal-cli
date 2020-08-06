@@ -75,21 +75,27 @@ class ManagerClient:
         return list(kwargs.values())
 
     def exec(self, contract_name, function_name, is_call, call_sender=None, gas_limit=None,
-             gas_price=None, kwargs={}):
+             gas_price=None, skip_estimate=False, kwargs={}):
         logger.info(f'Executing function {function_name} on contract {contract_name}')
         contract = self.init_contract(contract_name)
         params = self.transform_kwargs(kwargs)
         func_to_run = getattr(contract.contract.functions, function_name)
 
         call_params = {'from':  call_sender} if call_sender else {}
-        try:
-            gas = func_to_run(*params).estimateGas(call_params)
-            if not gas_limit:
-                gas_limit = gas
-        except Exception as e:
-            logger.error(f'estimateGas for {contract_name}.{function_name} failed, check the logs')
-            raise(e)
-        logger.info(f'Estimated gas for {contract_name}.{function_name}: {gas}')
+
+        if skip_estimate and not gas_limit:
+            logger.error('Remove SKIP_ESTIMATE or specify GAS_LIMIT')
+            exit(1)
+
+        if not skip_estimate:
+            try:
+                gas = func_to_run(*params).estimateGas(call_params)
+                if not gas_limit:
+                    gas_limit = gas
+            except Exception as e:
+                logger.error(f'estimateGas for {contract_name}.{function_name} failed, check the logs')
+                raise(e)
+            logger.info(f'Estimated gas for {contract_name}.{function_name}: {gas}')
 
         if is_call:
             res = func_to_run(*params).call(call_params)
