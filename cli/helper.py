@@ -31,6 +31,14 @@ def check_int(s):
     return s.isdigit()
 
 
+def check_bool(s):
+    return s.lower() in ['true', 'false']
+
+
+def str_to_bool(s):
+    return s.lower() in ['true']
+
+
 def is_func_call(fn):
     return fn['stateMutability'] == 'view'
 

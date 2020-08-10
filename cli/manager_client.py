@@ -28,7 +28,7 @@ from skale.utils.abi_utils import get_contract_address_by_name, get_contract_abi
 from skale.transactions.tools import post_transaction
 
 from cli.web3_utils import init_wallet
-from cli.helper import to_camel_case, check_int, get_contract_names
+from cli.helper import to_camel_case, check_int, get_contract_names, check_bool, str_to_bool
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +72,8 @@ class ManagerClient:
         for name in kwargs:
             if check_int(kwargs[name]):
                 kwargs[name] = int(kwargs[name])
+            if check_bool(kwargs[name]):
+                kwargs[name] = str_to_bool(kwargs[name])
         return list(kwargs.values())
 
     def exec(self, contract_name, function_name, is_call, call_sender=None, gas_limit=None,
