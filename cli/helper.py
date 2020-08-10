@@ -32,6 +32,8 @@ def check_int(s):
 
 
 def check_bool(s):
+    if isinstance(s, int):
+        return False
     return s.lower() in ['true', 'false']
 
 
