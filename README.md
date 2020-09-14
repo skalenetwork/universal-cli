@@ -17,6 +17,24 @@ CLI groups and commands are generated automatically from provided ABI file so th
 
 All calls and transactions from ABI file are already here, just use `--help` to see the details.
 
+
+## Python version
+
+You need to have python version 3.6 or later installed.
+
+## Installation
+
+Clone this repo and then do 
+
+```
+pip install .
+```
+
+Copy your ABI file to abi.json in the project root dir.
+
+If you want to use another file name, use ABI_FILEPATH option as described below.
+
+
 ## Usage
 
 Could be used as CLI tool or directly from Python scripts.
@@ -31,13 +49,13 @@ Supported wallets:
 
 #### Required
 
-- `ENDPOINT`
+- `ENDPOINT` - Ethereum JSON-RPC endpoint.
 
 For transactions you should set one of those:
 
-- `ETH_PRIVATE_KEY`
-- `LEDGER`
-- `TM_URL`
+- `ETH_PRIVATE_KEY` - ETH private key
+- `LEDGER` - use Ledger (true or false)
+- `TM_URL` - use SKALE trasaction manager
 
 #### Optional
 
