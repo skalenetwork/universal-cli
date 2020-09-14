@@ -2,7 +2,7 @@
 
 [![Discord](https://img.shields.io/discord/534485763354787851.svg)](https://discord.gg/vvUtWJB)
 
-Universal-cli is a universal command line to instantly execute any Solidity smartcontract.
+Universal-cli is a universal command line to instantly execute any Solidity smart contract.
 
 Super simple and useful for scripts and automation! All you need is ABI file!
 
