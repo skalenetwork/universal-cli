@@ -2,15 +2,22 @@
 
 [![Discord](https://img.shields.io/discord/534485763354787851.svg)](https://discord.gg/vvUtWJB)
 
-Universal Python wrapper for SKALE Manager contracts ✨
+A universal command line interface to instantly execute any Solidity smartcontract.
+
+Super simple and useful for scripts and automation! All you need is ABI file!
+
+Used and maintained heavily by SKALE
+
 
 > ⚠️ Important note: this CLI is meant to be used only for **development** purposes and debugging. For the production-ready tools refer to `skale.py` or `validator-cli`
 
 ## What it is
 
-This CLI/Python module could be used to execute (almost) any call/transaction on SKALE Manager contracts.  
+Universal-cli could be used to execute (almost) any call/transaction on Solidity contracts.  
+
 CLI groups and commands are generated automatically from provided ABI file so there is no need to update CLI after SM changes.  
-Also there is no such thing as 'call implemented only on SKALE Manager side' - all calls and transactions from ABI file are already here, just add `--help` to see the details.
+
+All calls and transactions from ABI file are already here, just use `--help` to see the details.
 
 #### Current limitations
 
@@ -21,7 +28,7 @@ Also there is no such thing as 'call implemented only on SKALE Manager side' - a
 
 ## Usage
 
-ManagerClient could be used as CLI tool or directly from Python scripts.
+Could be used as CLI tool or directly from Python scripts.
 
 Supported wallets:
 
