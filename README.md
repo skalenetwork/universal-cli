@@ -9,8 +9,6 @@ Super simple and useful for scripts and automation! All you need is ABI file!
 Used and maintained heavily by SKALE
 
 
-> ⚠️ Important note: this CLI is meant to be used only for **development** purposes and debugging. For the production-ready tools refer to `skale.py` or `validator-cli`
-
 ## What it is
 
 Universal-cli could be used to execute (almost) any call/transaction on Solidity contracts.  
