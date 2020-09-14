@@ -1,4 +1,4 @@
-# Universal-cli is a universal command line for Solidity Smart Contracts
+# Universal command line for Solidity Smart Contracts
 
 [![Discord](https://img.shields.io/discord/534485763354787851.svg)](https://discord.gg/vvUtWJB)
 
