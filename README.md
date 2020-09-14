@@ -17,22 +17,15 @@ CLI groups and commands are generated automatically from provided ABI file so th
 
 All calls and transactions from ABI file are already here, just use `--help` to see the details.
 
-#### Current limitations
-
-- Complex data types are not supported
-- No data formatting - only raw data from smart contracts
-- No retries, dry runs and balance checks for transactions
-- No pre-built binary and no pip package (yet)
-
 ## Usage
 
 Could be used as CLI tool or directly from Python scripts.
 
 Supported wallets:
 
-- SGX wallet
-- Web3 wallet
+- Web3.py wallet
 - Ledger wallet
+- SKALE SGX wallet
 
 ### Environment options
 
@@ -57,7 +50,7 @@ For transactions you should set one of those:
 
 ### CLI usage
 
-#### List avaliable contacts
+#### List avaliable contracts
 
 ```bash
 python main.py --help
@@ -148,6 +141,17 @@ print(res)
 ```bash
 pip install -e .[dev]
 ```
+
+
+
+## Current limitations
+
+- Complex data types are not supported
+- No data formatting - only raw data from smart contracts
+- No retries, dry runs and balance checks for transactions
+- No pre-built binary and no pip package (yet)
+
+
 
 ## License
 
