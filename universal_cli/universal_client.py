@@ -1,21 +1,21 @@
 #   -*- coding: utf-8 -*-
 #
-#   This file is part of SKALE.py
+#   This file is part of universal-cli
 #
-#   Copyright (C) 2019-Present SKALE Labs
+#   Copyright (C) 2020 SKALE Labs
 #
-#   SKALE.py is free software: you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU Affero General Public License as published by
 #   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
-#   SKALE.py is distributed in the hope that it will be useful,
+#   This program is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU Affero General Public License for more details.
 #
 #   You should have received a copy of the GNU Affero General Public License
-#   along with SKALE.py.  If not, see <https://www.gnu.org/licenses/>.
+#   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 
@@ -27,42 +27,24 @@ from skale.contracts.base_contract import BaseContract
 from skale.utils.abi_utils import get_contract_address_by_name, get_contract_abi_by_name
 from skale.transactions.tools import post_transaction
 
-from cli.web3_utils import init_wallet
-from cli.helper import to_camel_case, check_int, get_contract_names, check_bool, str_to_bool
+from universal_cli.web3_utils import init_wallet
+from universal_cli.helper import to_camel_case, check_int, get_contract_names, check_bool, str_to_bool
 
 logger = logging.getLogger(__name__)
 
 
-class SkaleMock:
-    def __init__(self, web3):
-        self.web3 = web3
-
-
-class ManagerClient:
+class UniversalClient:
     def __init__(self, endpoint, abi, wallet=None, provider_timeout=30):
-        logger.info(f'Initializing ManagerClient, endpoint: {endpoint}')
         self.contract_names = get_contract_names(abi)
         self.abi = abi
         self.wallet = wallet if wallet else init_wallet(endpoint)
         self.web3 = Web3(get_provider(endpoint, timeout=provider_timeout))
-        self.skale = SkaleMock(self.web3)
-        self.cm_contract = ContractManager(
-            skale=self.skale,
-            name='ContractManager',
-            address=get_contract_address_by_name(abi, 'contract_manager'),
-            abi=get_contract_abi_by_name(abi, 'contract_manager')
-        )
-
-    def get_contract_address(self, contract_name):
-        return self.cm_contract.get_contract_address(
-            name=to_camel_case(contract_name)
-        )
 
     def init_contract(self, contract_name):
-        address = self.get_contract_address(contract_name)
+        address = get_contract_address_by_name(self.abi, contract_name)
         contract_abi = get_contract_abi_by_name(self.abi, contract_name)
         return BaseContract(
-            skale=self.skale,
+            skale=None,
             name=contract_name,
             address=address,
             abi=contract_abi
