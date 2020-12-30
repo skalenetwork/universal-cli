@@ -29,7 +29,7 @@ extras_require['dev'] = (
 
 setup(
     name='universal-cli',
-    version='0.1',
+    version='0.2',
     description='SKALE Manager Universal CLI',
     long_description_markdown_filename='README.md',
     author='SKALE Labs',
@@ -37,7 +37,7 @@ setup(
     url='https://github.com/skalenetwork/universal-cli',
     include_package_data=True,
     install_requires=[
-        "skale.py==3.10.dev19",
+        "skale.py==5.0dev3",
         "python-dotenv==0.10.3",
         "Click==7.1.2"
     ],
