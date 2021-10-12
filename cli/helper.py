@@ -42,7 +42,7 @@ def str_to_bool(s):
 
 
 def is_func_call(fn):
-    return fn['stateMutability'] == 'view'
+    return fn.get('stateMutability') == 'view'
 
 
 def get_contract_names(abi):

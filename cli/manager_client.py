@@ -46,20 +46,20 @@ class ManagerClient:
         self.wallet = wallet if wallet else init_wallet(endpoint)
         self.web3 = Web3(get_provider(endpoint, timeout=provider_timeout))
         self.skale = SkaleMock(self.web3)
-        self.cm_contract = ContractManager(
-            skale=self.skale,
-            name='ContractManager',
-            address=get_contract_address_by_name(abi, 'contract_manager'),
-            abi=get_contract_abi_by_name(abi, 'contract_manager')
-        )
+        # self.cm_contract = ContractManager(
+        #     skale=self.skale,
+        #     name='ContractManager',
+        #     address=get_contract_address_by_name(abi, 'contract_manager'),
+        #     abi=get_contract_abi_by_name(abi, 'contract_manager')
+        # )
 
-    def get_contract_address(self, contract_name):
-        return self.cm_contract.get_contract_address(
-            name=to_camel_case(contract_name)
-        )
+    # def get_contract_address(self, contract_name):
+    #     return self.cm_contract.get_contract_address(
+    #         name=to_camel_case(contract_name)
+        # )
 
     def init_contract(self, contract_name):
-        address = self.get_contract_address(contract_name)
+        address = get_contract_address_by_name(self.abi, contract_name)
         contract_abi = get_contract_abi_by_name(self.abi, contract_name)
         return BaseContract(
             skale=self.skale,
