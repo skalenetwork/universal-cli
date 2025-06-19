@@ -84,7 +84,7 @@ jobs:
       - name: Define Asset Name
         id: asset_details
         run: |
-          ASSET_BASE_NAME="skale-${{ needs.create_release.outputs.version }}-Linux-x86_64"
+          ASSET_BASE_NAME="uni-${{ needs.create_release.outputs.version }}-Linux-x86_64"
           echo "FINAL_ASSET_NAME=${ASSET_BASE_NAME}" >> $GITHUB_OUTPUT
 
       - name: Install dependencies

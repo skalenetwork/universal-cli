@@ -1,6 +1,6 @@
 #   -*- coding: utf-8 -*-
 #
-#   This file is part of SKALE.py
+#   This file is part of universal-cli
 #
 #   Copyright (C) 2019 SKALE Labs
 #

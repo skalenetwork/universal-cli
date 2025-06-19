@@ -15,7 +15,7 @@ echo "VERSION=$VERSION" >> $GITHUB_ENV
 echo "Version $VERSION"
 
 export OS=`uname -s`-`uname -m`
-export EXECUTABLE_NAME=skale-$VERSION-$OS
+export EXECUTABLE_NAME=uni-$VERSION-$OS
 
 echo "BRANCH=$BRANCH" >> $GITHUB_ENV
 echo "EXECUTABLE_NAME=$EXECUTABLE_NAME" >> $GITHUB_ENV
