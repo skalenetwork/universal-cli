@@ -7,142 +7,55 @@ Universal-cli is a universal command line to instantly execute any Smart Contrac
 ## What it is
 
 Universal-cli could be used to execute (almost) any call/transaction on Solidity contracts.
+CLI groups and commands are generated automatically from provided project and alias/address.
 
-CLI groups and commands are generated automatically from provided ABI file so there is no need to update CLI after SM changes.
-
-All calls and transactions from ABI file are already here, just use `--help` to see the details.
+All calls and transactions from the contracts are already here, just use `--help` to see the details.
 
 ## Python version
 
 You need to have python version 3.11 or later installed.
 
-## Installation
+## Binary installation
 
-Clone this repo and then do
-
-```
-pip install .
-```
-
-Copy your ABI file to abi.json in the project root dir.
-
-If you want to use another file name, use ABI\_FILEPATH option as described below.
-
-## Usage
-
-Could be used as CLI tool or directly from Python scripts.
-
-Supported wallets:
-
-* Web3.py wallet
-* Ledger wallet
-* SKALE SGX wallet
-
-### Environment options
-
-#### Required
-
-* `ENDPOINT` - Ethereum JSON-RPC endpoint.
-
-For transactions you should set one of those:
-
-* `ETH_PRIVATE_KEY` - ETH private key
-* `LEDGER` - use Ledger (true or false)
-* `TM_URL` - use SKALE trasaction manager
-
-#### Optional
-
-* `DRY_RUN` - Run the transaction method as a call (`True/False`). Default: `False`.
-* `SKIP_ESTIMATE` - skip gas estimation before running (`True/False`). Default: `False`.
-* `CALL_SENDER` - Ethereum address that will be used in the call. Default: `None`.
-* `GAS_LIMIT` - gas limit for the transaction/call. Default: result of the `estimateGas` function.
-* `GAS_PRICE` - gas price for the transaction. Default: calculated by `web3py`.
-* `ABI_FILEPATH` - path to the ABI. Default: `[PROJECT_ROOT]/manager.json`
-
-### CLI usage
-
-#### List avaliable contracts
+Download the latest binary:
 
 ```bash
-python main.py --help
-
-Usage: main.py [OPTIONS] COMMAND [ARGS]...
-
-Options:
-  --help  Show this message and exit.
-
-Commands:
-  bounty
-  constants_holder
-  contract_manager
-  decryption
-  delegation_controller
-  delegation_period_manager
-  distributor
-  ...
+VERSION_NUM={put the version number here} && sudo -E bash -c "curl -L https://github.com/skalenetwork/universal-cli/releases/download/$VERSION_NUM/uni-$VERSION_NUM-`uname -s`-`uname -m` >  /usr/local/bin/uni"
 ```
 
-#### List avaliable methods on contracts
+Apply executable permissions to the downloaded binary:
 
 ```bash
-python main.py nodes --help
-
-Usage: main.py nodes [OPTIONS] COMMAND [ARGS]...
-
-Options:
-  --help  Show this message and exit.
-
-Commands:
-  DEFAULT_ADMIN_ROLE
-  ExitCompleted
-  ExitInited
-  NodeCreated
-  RoleGranted
-  RoleRevoked
-  addSpaceToNode
-  ...
+sudo chmod +x /usr/local/bin/uni
 ```
 
-#### Run cmd
+Test the installation:
 
 ```bash
-python main.py validator_service validators --option 1
+uni --help
 ```
 
-#### Show required options for the command
+Check out the list of available projects:
 
 ```bash
-python main.py validator_service registerValidator --help
-
-Usage: main.py validator_service registerValidator [OPTIONS]
-
-Options:
-  --name TEXT
-  --description TEXT
-  --feeRate TEXT
-  --minimumDelegationAmount TEXT
-  --help                          Show this message and exit.
+uni projects
 ```
 
-### Python usage
+## Environment variables
 
-```python
-wallet = Web3Wallet(ETH_PRIVATE_KEY, web3)
-mc = ManagerClient(ENDPOINT, ABI, wallet)
+You need to set the following environment variables:
 
-kwargs = {
-    'name': 'test',
-    'description': 'test',
-    'feeRate': '10',
-    'minimumDelegationAmount': '100',
-}
-res = mc.exec(
-    contract_name='validator_serivce',
-    function_name='registerValidator',
-    transaction=True,
-    kwargs=kwargs
-)
-print(res)
+```bash
+PROJECT=""
+ENDPOINT=""
+ALIAS_OR_ADDRESS=""
+
+# to use with plain private key
+ETH_PRIVATE_KEY=""
+
+# to use with SGX
+SGX_URL=""
+SGX_KEY_NAME=""
 ```
 
 ## Setup
@@ -156,12 +69,10 @@ pip install -e .[dev]
 ## Current limitations
 
 * Complex data types are not supported
-* No data formatting - only raw data from smart contracts
 * No retries, dry runs and balance checks for transactions
-* No pre-built binary and no pip package (yet)
 
 ## License
 
-[![License](https://img.shields.io/github/license/skalenetwork/sgx.py.svg)](LICENSE)
+[![License](https://img.shields.io/github/license/skalenetwork/universal-cli.svg)](LICENSE)
 
-Copyright (C) 2020-present SKALE Labs
+Copyright (C) 2020-Present SKALE Labs

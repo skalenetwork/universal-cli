@@ -1,6 +1,6 @@
 #   -*- coding: utf-8 -*-
 #
-#   This file is part of SKALE.py
+#   This file is part of universal-cli
 #
 #   Copyright (C) 2019 SKALE Labs
 #
@@ -22,6 +22,7 @@ import json
 import logging
 from typing import Union
 
+from web3 import Web3
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,24 @@ def get_enum_by_value(enum_class, value):
 
 def kwargs_to_args(**kwargs):
     return list(kwargs.values())
+
+
+def hex_to_bytes_python(hex_string: str) -> bytes:
+    if hex_string.startswith('0x') or hex_string.startswith('0X'):
+        hex_string = hex_string[2:]
+    if len(hex_string) % 2:
+        hex_string = '0' + hex_string
+    return bytes.fromhex(hex_string)
+
+
+def format_func_args(args):
+    formatted_args = []
+    for arg in args:
+        if isinstance(arg, str) and arg.startswith('0x'):
+            formatted_args.append(Web3.to_bytes(hexstr=arg))
+        else:
+            formatted_args.append(arg)
+    return formatted_args
 
 
 def abi_type_to_python(abi_type: str) -> Union[type, str]:

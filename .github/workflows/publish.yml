@@ -1,11 +1,5 @@
 name: Build and publish
 on:
-  push:
-    branches:
-      - master
-      - develop
-      - beta
-      - stable
   pull_request:
     types: [closed]
     branches:
@@ -74,7 +68,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04]
+        include:
+          - os: ubuntu-22.04
+            asset_name: uni-${{ needs.create_release.outputs.version }}-Linux-x86_64
+          - os: macos-latest
+            asset_name: uni-${{ needs.create_release.outputs.version }}-Darwin-arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -97,25 +95,23 @@ jobs:
       - name: Define Asset Name
         id: asset_details
         run: |
-          ASSET_BASE_NAME="skale-${{ needs.create_release.outputs.version }}-Linux-x86_64"
-          echo "FINAL_ASSET_NAME=${ASSET_BASE_NAME}" >> $GITHUB_OUTPUT
+          echo "FINAL_ASSET_NAME=${{ matrix.asset_name }}" >> $GITHUB_OUTPUT
+
+      - name: Run macOS fix for M2Crypto
+        if: matrix.os == 'macos-latest'
+        run: |
+          bash ./scripts/m2crypto_macos_fix.sh
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install -e .[dev]
+          pip install wheel
 
       - name: Build release binary
         run: |
-          mkdir -p ${{ github.workspace }}/dist
-          docker build . -t node-cli-builder
-          docker run --rm -v ${{ github.workspace }}/dist:/app/dist node-cli-builder \
-            scripts/build.sh ${{ needs.create_release.outputs.version }} ${{ needs.create_release.outputs.branch }}
-          echo "Contents of dist directory:"
-          ls -altr ${{ github.workspace }}/dist/
-          docker rm -f $(docker ps -aq) || true
-
-      - name: Save sha512sum for ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}
-        run: |
-          cd ${{ github.workspace }}/dist
-          sha512sum ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }} > ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}.sha512sum
-          echo "Checksum file created: ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}.sha512sum"
-          cat ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}.sha512sum
+          scripts/build.sh ${{ needs.create_release.outputs.version }} ${{ needs.create_release.outputs.branch }}
 
       - name: Upload release binary
         uses: actions/upload-release-asset@v1
@@ -126,13 +122,3 @@ jobs:
           asset_path: ${{ github.workspace }}/dist/${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}
           asset_name: ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}
           asset_content_type: application/octet-stream
-
-      - name: Upload release checksum
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/dist/${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}.sha512sum
-          asset_name: ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}.sha512
-          asset_content_type: text/plain
