@@ -89,13 +89,7 @@ jobs:
 
       - name: Build release binary
         run: |
-          mkdir -p ${{ github.workspace }}/dist
-          docker build . -t universal-cli-builder
-          docker run --rm -v ${{ github.workspace }}/dist:/app/dist universal-cli-builder \
-            scripts/build.sh ${{ needs.create_release.outputs.version }} ${{ needs.create_release.outputs.branch }}
-          echo "Contents of dist directory:"
-          ls -altr ${{ github.workspace }}/dist/
-          docker rm -f $(docker ps -aq) || true
+          scripts/build.sh ${{ needs.create_release.outputs.version }} ${{ needs.create_release.outputs.branch }}
 
       - name: Save sha512sum for ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}
         run: |
