@@ -1,18 +1,5 @@
 name: Build and publish
-on:
-  push:
-    branches:
-      - master
-      - develop
-      - beta
-      - stable
-  pull_request:
-    types: [closed]
-    branches:
-      - master
-      - develop
-      - beta
-      - stable
+on: [push, pull_request]
 
 jobs:
   create_release:
@@ -103,8 +90,8 @@ jobs:
       - name: Build release binary
         run: |
           mkdir -p ${{ github.workspace }}/dist
-          docker build . -t node-cli-builder
-          docker run --rm -v ${{ github.workspace }}/dist:/app/dist node-cli-builder \
+          docker build . -t universal-cli-builder
+          docker run --rm -v ${{ github.workspace }}/dist:/app/dist universal-cli-builder \
             scripts/build.sh ${{ needs.create_release.outputs.version }} ${{ needs.create_release.outputs.branch }}
           echo "Contents of dist directory:"
           ls -altr ${{ github.workspace }}/dist/
