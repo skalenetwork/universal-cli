@@ -2,7 +2,7 @@
 #
 #   This file is part of SKALE.py
 #
-#   Copyright (C) 2019 SKALE Labs
+#   Copyright (C) 2019-Present SKALE Labs
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU Lesser General Public License as published by
@@ -17,24 +17,24 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
-from skale.wallets import LedgerWallet, RPCWallet, Web3Wallet
-from skale.utils.web3_utils import init_web3
-
-from cli.config import TM_URL, ETH_PRIVATE_KEY, LEDGER
+import os
+from dotenv import load_dotenv
 
 
-def init_wallet(endpoint):
-    if TM_URL:
-        return RPCWallet(TM_URL)
-    web3 = init_web3(endpoint)
-    if LEDGER:
-        return LedgerWallet(web3, debug=True)
-    if ETH_PRIVATE_KEY:
-        return Web3Wallet(ETH_PRIVATE_KEY, web3)
+load_dotenv()
 
-        raise Exception(
-            'You should provide TM_URL or ETH_PRIVATE_KEY or '
-            'set LEDGER=1 to init wallet'
-        )
-    return Web3Wallet(ETH_PRIVATE_KEY, web3)
+ENDPOINT = os.environ.get('ENDPOINT')
+PROJECT = os.environ.get('PROJECT')
+ALIAS_OR_ADDRESS = os.environ.get('ALIAS_OR_ADDRESS')
+
+ETH_PRIVATE_KEY = os.environ.get('ETH_PRIVATE_KEY')
+SGX_URL = os.environ.get('SGX_URL')
+SGX_KEY_NAME = os.environ.get('SGX_KEY_NAME')
+
+DRY_RUN = os.getenv('DRY_RUN') == 'True'
+CALL_SENDER = os.environ.get('CALL_SENDER')
+GAS_LIMIT = os.environ.get('GAS_LIMIT')
+GAS_PRICE = os.environ.get('GAS_PRICE')
+
+LEDGER = os.getenv('LEDGER') == 'True'
+DEBUG = os.getenv('DEBUG') == 'True'

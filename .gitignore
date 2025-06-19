@@ -122,3 +122,5 @@ unique.json
 .vscode/
 
 manager.json
+
+.ruff_cache

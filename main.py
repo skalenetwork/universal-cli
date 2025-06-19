@@ -2,7 +2,7 @@
 #
 #   This file is part of SKALE.py
 #
-#   Copyright (C) 2019 SKALE Labs
+#   Copyright (C) 2019-Present SKALE Labs
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU Lesser General Public License as published by
@@ -20,71 +20,130 @@
 import logging
 import click
 
-from skale.utils.helper import get_abi, init_default_logger
-from skale.utils.abi_utils import get_contract_abi_by_name
+from skale.utils.helper import init_default_logger
+from skale.utils.web3_utils import init_web3
+from skale_contracts import skale_contracts
+from skale_contracts.instance import Instance
+from skale_contracts.project_factory import SkaleProject
 
-from cli.manager_client import ManagerClient
-from cli.config import (ENDPOINT, ABI_FILEPATH, ETH_PRIVATE_KEY, LEDGER, TM_URL, DRY_RUN,
-                        CALL_SENDER, GAS_LIMIT, GAS_PRICE, SKIP_ESTIMATE)
-from cli.helper import is_func_call, get_contract_names
+from web3_utils import init_wallet
+from config import ENDPOINT, ALIAS_OR_ADDRESS, PROJECT, DEBUG
+from helper import (
+    get_enum_by_value,
+    is_func_call,
+    format_outputs,
+    abi_type_to_python,
+    kwargs_to_args,
+)
 
 
-init_default_logger()
+if DEBUG:
+    init_default_logger()
 logger = logging.getLogger(__name__)
 
-ABI = get_abi(ABI_FILEPATH)
 
-
-def generate_cmd(contract_name, fn):
+def generate_cmd(contract_name_key, instance: Instance, fn: dict) -> click.Command:
     function_name = fn['name']
-    params = []
+    params: list[click.Option] = []
 
     for input_variable in fn['inputs']:
         if not input_variable.get('components'):
-
-            if input_variable["name"] != "":
+            if input_variable['name'] != '':
                 opt_name = f'--{input_variable["name"]}'
-                name = input_variable["name"]
+                name = input_variable['name']
             else:
                 opt_name = '--option'
-                name = 'no name'
-            opt = click.Option((opt_name,), prompt=f'Name: {name}, type: {input_variable["type"]}')
+                name = 'Enter option value'
+            sol_type = input_variable['type']
+            py_type = abi_type_to_python(sol_type)
+            opt = click.Option((opt_name,), type=py_type, prompt=f'{name} ({sol_type})')
             params.append(opt)
 
     @click.pass_context
     def callback(*args, **kwargs):
-        if not ENDPOINT:
-            logger.error('Set ENDPOINT option to the environment')
-            exit(1)
-        mc = ManagerClient(ENDPOINT, ABI)
-        is_call = is_func_call(fn) or DRY_RUN
-        if not is_call and not (ETH_PRIVATE_KEY or LEDGER or TM_URL):
-            logger.error('To execute transactions you should set ETH_PRIVATE_KEY/LEDGER/TM_URL')
-            exit(1)
-        res = mc.exec(contract_name, function_name, is_call, CALL_SENDER, GAS_LIMIT, GAS_PRICE,
-                      SKIP_ESTIMATE, kwargs)
-        logger.info(f'TRANSACTION_RESULT: {res}')
+        contract = instance.get_contract(contract_name_key)
+        func = contract.functions[fn['name']]
+        func_args = kwargs_to_args(**kwargs)
+        is_call = is_func_call(fn)
+
+        if is_call:
+            res = func(*func_args).call()
+            format_outputs(fn['outputs'], res)
+        else:
+            wallet = init_wallet(instance.web3)
+            if not click.confirm(
+                f'transaction: {function_name}, arguments: {func_args}, sender: {wallet.address}, proceed?'
+            ):
+                click.echo('Aborted.')
+                return
+
+            # print(func_args)
+            # print(func(*func_args))
+
+            tx = func(*func_args).build_transaction()
+            tx_hash = wallet.sign_and_send(tx)
+            print(f'⏳ Transaction sent: {tx_hash}, waiting for receipt...')
+            wallet.wait(tx_hash=tx_hash)
+            print(f'✅ Transaction confirmed: {tx_hash}')
+
     return click.Command(function_name, params=params, callback=callback)
 
 
-def init_groups():
+def get_contract_names(contract_names: set) -> list:
+    return sorted([contract.value for contract in contract_names])
+
+
+def init_groups(instance: Instance | None):
+    if not instance:
+        return []
+    logger.info(f'Initializing groups for instance of {instance._project.name()}')
     groups = []
-    contract_names = get_contract_names(ABI)
+    contract_names_set = instance.contract_names
+    contract_names = get_contract_names(contract_names_set)
     for contract_name in contract_names:
         group = click.Group(name=f'{contract_name}_cli')
         group_internal = click.Group(name=f'{contract_name}')
+        try:
+            contract_name_key = get_enum_by_value(contract_names_set, contract_name)
+            contract_abi = instance.abi[contract_name_key]
+            for fn in contract_abi:
+                if fn.get('name'):
+                    cmd = generate_cmd(contract_name_key, instance, fn)
+                    group_internal.add_command(cmd)
+        except Exception as e:
+            logger.exception(f'Could not load contract {contract_name}: {e}')
+            continue
 
-        contract_abi = get_contract_abi_by_name(ABI, contract_name)
-        for fn in contract_abi:
-            if fn.get('name'):
-                cmd = generate_cmd(contract_name, fn)
-                group_internal.add_command(cmd)
         group.add_command(group_internal)
         groups.append(group)
     return groups
 
 
-if __name__ == "__main__":
-    groups = init_groups()
-    cmd_collection = click.CommandCollection(sources=groups)
+def init_instance() -> Instance | None:
+    if not PROJECT or not ENDPOINT or not ALIAS_OR_ADDRESS:
+        return None
+    logger.info(f'Initializing project {PROJECT} at {ENDPOINT} with alias {ALIAS_OR_ADDRESS}')
+    web3 = init_web3(ENDPOINT)
+    network = skale_contracts.get_network_by_provider(web3.provider)
+    project = network.get_project(PROJECT)
+    return project.get_instance(ALIAS_OR_ADDRESS)
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command('projects', help='Show supported projects')
+def projects():
+    print('Supported projects: \n')
+    for project in SkaleProject:
+        print(project.value)
+    print('\nSet PROJECT variable in env: PROJECT=project-name')
+
+
+if __name__ == '__main__':
+    instance = init_instance()
+    groups = init_groups(instance)
+    cmd_collection = click.CommandCollection(sources=[cli, *groups])
     cmd_collection()

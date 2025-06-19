@@ -7,44 +7,32 @@ from setuptools import (
 
 extras_require = {
     'linter': [
-        "flake8==3.7.9",
-        "isort>=4.2.15,<4.3.22",
+        'ruff==0.12.0',
+        'isort==6.0.1',
+        'importlib-metadata==8.7.0',
     ],
     'dev': [
-        "bumpversion==0.6.0",
-        "pytest==5.4.3",
-        "twine==3.1.1",
-        "mock==4.0.2",
-        "when-changed",
-        "pytest-cov==2.8.1"
+        'PyInstaller==5.12.0',
+        'pytest==8.4.1',
+        'twine==6.1.0',
+        'mock==5.2.0',
     ],
-    'hw-wallet': [
-        "ledgerblue==0.1.31"
-    ]
 }
 
-extras_require['dev'] = (
-    extras_require['linter'] + extras_require['dev'] + extras_require['hw-wallet']
-)
+extras_require['dev'] = extras_require['linter'] + extras_require['dev']
 
 setup(
     name='universal-cli',
-    version='0.1',
+    version='1.0',
     description='SKALE Manager Universal CLI',
     long_description_markdown_filename='README.md',
     author='SKALE Labs',
     author_email='support@skalelabs.com',
     url='https://github.com/skalenetwork/universal-cli',
     include_package_data=True,
-    install_requires=[
-        "skale.py==3.10.dev19",
-        "python-dotenv==0.10.3",
-        "Click==7.1.2"
-    ],
-
-    python_requires='>=3.6,<4',
+    install_requires=['skale.py==7.0dev10', 'python-dotenv==1.1.0', 'click==8.2.1'],
+    python_requires='>=3.11,<4',
     extras_require=extras_require,
-
     keywords='skale',
     packages=find_packages(exclude=['tests']),
     classifiers=[
@@ -52,6 +40,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.6',
-    ]
+        'Programming Language :: Python :: 3.11',
+    ],
 )

@@ -17,26 +17,16 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
-from dotenv import load_dotenv
+from web3 import Web3
+from skale.wallets import LedgerWallet, Web3Wallet, SgxWallet, BaseWallet
+
+from config import ETH_PRIVATE_KEY, LEDGER, SGX_URL, SGX_KEY_NAME
 
 
-load_dotenv()
-
-DIR_PATH = os.path.dirname(os.path.realpath(__file__))
-
-ENDPOINT = os.environ.get('ENDPOINT')
-
-ABI_FILEPATH = os.environ.get("ABI_FILEPATH")
-if not ABI_FILEPATH:
-    ABI_FILEPATH = os.path.join(DIR_PATH, os.pardir, 'manager.json')
-
-TM_URL = os.environ.get('TM_URL')
-ETH_PRIVATE_KEY = os.environ.get('ETH_PRIVATE_KEY')
-LEDGER = os.environ.get('LEDGER')
-
-DRY_RUN = os.getenv('DRY_RUN') == 'True'
-SKIP_ESTIMATE = os.getenv('SKIP_ESTIMATE') == 'True'
-CALL_SENDER = os.environ.get("CALL_SENDER")
-GAS_LIMIT = os.environ.get("GAS_LIMIT")
-GAS_PRICE = os.environ.get("GAS_PRICE")
+def init_wallet(w3: Web3) -> BaseWallet:
+    if LEDGER:
+        return LedgerWallet(w3, debug=True)
+    if ETH_PRIVATE_KEY:
+        return Web3Wallet(ETH_PRIVATE_KEY, w3)
+    if SGX_URL:
+        return SgxWallet(SGX_URL, w3, key_name=SGX_KEY_NAME)

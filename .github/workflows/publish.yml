@@ -1,0 +1,138 @@
+name: Build and publish
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - beta
+      - stable
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+      - develop
+      - beta
+      - stable
+
+jobs:
+  create_release:
+    if: github.event.pull_request.merged
+    name: Create release
+    runs-on: ubuntu-22.04
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.export_outputs.outputs.version }}
+      branch: ${{ steps.export_outputs.outputs.branch }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+
+      - name: Install ubuntu dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python-setuptools
+
+      - name: Set Versions
+        run: |
+          bash ./scripts/set_versions_ga.sh
+
+      - name: Set release
+        run: |
+          if [[ "$BRANCH" == "stable" ]]; then
+            export PRERELEASE=false
+          else
+            export PRERELEASE=true
+          fi
+          echo "PRERELEASE=$PRERELEASE" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: ${{ env.VERSION }}
+          draft: false
+          prerelease: ${{ env.PRERELEASE }}
+
+      - name: Export outputs
+        id: export_outputs
+        run: |
+          echo "::set-output name=version::$VERSION"
+          echo "::set-output name=branch::$BRANCH"
+
+  build_and_publish:
+    if: github.event.pull_request.merged
+    needs: create_release
+    name: Build and publish for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install ubuntu dependencies
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+
+      - name: Ensure submodules are updated
+        run: git submodule update --init --recursive
+
+      - name: Define Asset Name
+        id: asset_details
+        run: |
+          ASSET_BASE_NAME="skale-${{ needs.create_release.outputs.version }}-Linux-x86_64"
+          echo "FINAL_ASSET_NAME=${ASSET_BASE_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Build release binary
+        run: |
+          mkdir -p ${{ github.workspace }}/dist
+          docker build . -t node-cli-builder
+          docker run --rm -v ${{ github.workspace }}/dist:/app/dist node-cli-builder \
+            scripts/build.sh ${{ needs.create_release.outputs.version }} ${{ needs.create_release.outputs.branch }}
+          echo "Contents of dist directory:"
+          ls -altr ${{ github.workspace }}/dist/
+          docker rm -f $(docker ps -aq) || true
+
+      - name: Save sha512sum for ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}
+        run: |
+          cd ${{ github.workspace }}/dist
+          sha512sum ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }} > ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}.sha512sum
+          echo "Checksum file created: ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}.sha512sum"
+          cat ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}.sha512sum
+
+      - name: Upload release binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/dist/${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}
+          asset_name: ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}
+          asset_content_type: application/octet-stream
+
+      - name: Upload release checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/dist/${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}.sha512sum
+          asset_name: ${{ steps.asset_details.outputs.FINAL_ASSET_NAME }}.sha512
+          asset_content_type: text/plain
