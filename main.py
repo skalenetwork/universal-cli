@@ -110,8 +110,8 @@ def init_groups(instance: Instance | None):
                 if fn.get('name'):
                     cmd = generate_cmd(contract_name_key, instance, fn)
                     group_internal.add_command(cmd)
-        except Exception as e:
-            logger.exception(f'Could not load contract {contract_name}: {e}')
+        except Exception:
+            # logger.exception(f'Could not load contract {contract_name}: {e}')
             continue
 
         group.add_command(group_internal)
