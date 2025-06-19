@@ -65,7 +65,7 @@ jobs:
           - os: ubuntu-22.04
             asset_name: uni-${{ needs.create_release.outputs.version }}-Linux-x86_64
           - os: macos-latest
-            asset_name: uni-${{ needs.create_release.outputs.version }}-Darwin-x86_64
+            asset_name: uni-${{ needs.create_release.outputs.version }}-Darwin-arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
