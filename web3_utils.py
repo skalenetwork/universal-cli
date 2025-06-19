@@ -26,7 +26,7 @@ from config import ETH_PRIVATE_KEY, LEDGER, SGX_URL, SGX_KEY_NAME
 def init_wallet(w3: Web3) -> BaseWallet:
     if LEDGER:
         return LedgerWallet(w3, debug=True)
+    if SGX_URL:
+        return SgxWallet(SGX_URL, w3, key_name=SGX_KEY_NAME, path_to_cert='/tmp/')
     if ETH_PRIVATE_KEY:
         return Web3Wallet(ETH_PRIVATE_KEY, w3)
-    if SGX_URL:
-        return SgxWallet(SGX_URL, w3, key_name=SGX_KEY_NAME)

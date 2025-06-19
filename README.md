@@ -46,11 +46,16 @@ uni projects
 You need to set the following environment variables:
 
 ```bash
-PROJECT=
-ENDPOINT=
-ALIAS_OR_ADDRESS=
+PROJECT=""
+ENDPOINT=""
+ALIAS_OR_ADDRESS=""
 
-ETH_PRIVATE_KEY=
+# to use with plain private key
+ETH_PRIVATE_KEY=""
+
+# to use with SGX
+SGX_URL=""
+SGX_KEY_NAME=""
 ```
 
 ## Setup

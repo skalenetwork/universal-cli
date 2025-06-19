@@ -19,6 +19,9 @@
 
 import logging
 import click
+from Crypto.Hash import keccak
+from web3 import Web3
+from web3.types import HexStr
 
 from skale.utils.helper import init_default_logger
 from skale.utils.web3_utils import init_web3
@@ -27,13 +30,14 @@ from skale_contracts.instance import Instance
 from skale_contracts.project_factory import SkaleProject
 
 from web3_utils import init_wallet
-from config import ENDPOINT, ALIAS_OR_ADDRESS, PROJECT, DEBUG
+from config import ENDPOINT, ALIAS_OR_ADDRESS, PROJECT, DEBUG, GAS_LIMIT
 from helper import (
     get_enum_by_value,
     is_func_call,
     format_outputs,
     abi_type_to_python,
     kwargs_to_args,
+    format_func_args,
 )
 
 
@@ -64,6 +68,7 @@ def generate_cmd(contract_name_key, instance: Instance, fn: dict) -> click.Comma
         contract = instance.get_contract(contract_name_key)
         func = contract.functions[fn['name']]
         func_args = kwargs_to_args(**kwargs)
+        func_args = format_func_args(func_args)
         is_call = is_func_call(fn)
 
         if is_call:
@@ -77,14 +82,18 @@ def generate_cmd(contract_name_key, instance: Instance, fn: dict) -> click.Comma
                 click.echo('Aborted.')
                 return
 
-            # print(func_args)
-            # print(func(*func_args))
+            transaction_opts = {'from': wallet.address}
+            if GAS_LIMIT:
+                transaction_opts['gas'] = int(GAS_LIMIT)
 
-            tx = func(*func_args).build_transaction()
+            tx = func(*func_args).build_transaction(transaction_opts)
             tx_hash = wallet.sign_and_send(tx)
             print(f'⏳ Transaction sent: {tx_hash}, waiting for receipt...')
-            wallet.wait(tx_hash=tx_hash)
-            print(f'✅ Transaction confirmed: {tx_hash}')
+            receipt = wallet.wait(tx_hash=tx_hash)
+            if receipt['status'] == 0:
+                print(f'❌ Transaction failed: {tx_hash}')
+            else:
+                print(f'✅ Transaction confirmed: {tx_hash}')
 
     return click.Command(function_name, params=params, callback=callback)
 
@@ -140,6 +149,14 @@ def projects():
     for project in SkaleProject:
         print(project.value)
     print('\nSet PROJECT variable in env: PROJECT=project-name')
+
+
+@cli.command('schain-name-to-id', help='Convert Schain name to ID')
+@click.argument('name', type=str)
+def schain_name_to_id(name: str):
+    keccak_hash = keccak.new(data=name.encode('utf8'), digest_bits=256)
+    schain_hash = Web3.to_hex(hexstr=HexStr(keccak_hash.hexdigest()))
+    click.echo(f'Schain name: {name}, Schain ID: {schain_hash}')
 
 
 if __name__ == '__main__':
