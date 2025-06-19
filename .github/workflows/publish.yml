@@ -62,7 +62,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             asset_name: uni-${{ needs.create_release.outputs.version }}-Linux-x86_64
           - os: macos-latest
             asset_name: uni-${{ needs.create_release.outputs.version }}-Darwin-x86_64
@@ -89,6 +89,11 @@ jobs:
         id: asset_details
         run: |
           echo "FINAL_ASSET_NAME=${{ matrix.asset_name }}" >> $GITHUB_OUTPUT
+
+      - name: Run macOS fix for M2Crypto
+        if: matrix.os == 'macos-latest'
+        run: |
+          bash ./scripts/m2crypto_macos_fix.sh
 
       - name: Install dependencies
         run: |
