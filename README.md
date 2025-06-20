@@ -58,6 +58,29 @@ SGX_URL=""
 SGX_KEY_NAME=""
 ```
 
+## Usage
+
+This example shows how to send a simple call to the skale-manager contracts:
+
+Environment variables:
+
+```bash
+PROJECT=skale-manager
+ENDPOINT=https://ethereum-rpc.publicnode.com
+ALIAS_OR_ADDRESS=production
+```
+
+Command:
+
+```bash
+uni Nodes getNodeDomainName --nodeIndex 60
+
+# Output
+{
+  "domainName": "skale-jupiter-2.skale.figment.io"
+}
+```
+
 ## Setup
 
 ### Dev setup
