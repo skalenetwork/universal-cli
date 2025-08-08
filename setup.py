@@ -30,7 +30,7 @@ setup(
     author_email='support@skalelabs.com',
     url='https://github.com/skalenetwork/universal-cli',
     include_package_data=True,
-    install_requires=['skale.py==7.0dev10', 'python-dotenv==1.1.0', 'click==8.2.1'],
+    install_requires=['skale.py==7.3dev6', 'python-dotenv==1.1.0', 'click==8.2.1'],
     python_requires='>=3.11,<4',
     extras_require=extras_require,
     keywords='skale',
